@@ -25,6 +25,9 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 /**
@@ -76,11 +79,16 @@ public class ArtistDetailActivityFragment extends Fragment {
             SpotifyApi spotifyApi = new SpotifyApi();
             SpotifyService service = spotifyApi.getService();
 
+            final List<Track> artistTracks = new ArrayList<Track>();
             Map<String, Object> options = new HashMap<String, Object>();
             options.put(COUNTRY_KEY, US_ISO_CODE);
-            Tracks tracks = service.getArtistTopTrack(params[0], options);
 
-            List<Track> artistTracks = tracks.tracks;
+            try {
+                Tracks trackList = service.getArtistTopTrack(params[0], options);
+                artistTracks.addAll(trackList.tracks);
+            } catch (RetrofitError e) {
+                Log.e(SpotifyTopTracksTask.class.getName(), e.getMessage());
+            }
 
             return artistTracks;
         }

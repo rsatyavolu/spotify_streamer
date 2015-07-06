@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item name="dark_text" type="color">#040404</item>
+    <item name="light_text" type="color">#343434</item>
+
+</resources>
