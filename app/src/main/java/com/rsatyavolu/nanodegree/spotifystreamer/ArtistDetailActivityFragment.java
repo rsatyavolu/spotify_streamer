@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.rsatyavolu.nanodegree.spotifystreamer.adapters.TopTracksDisplayAdapter;
+import com.rsatyavolu.nanodegree.spotifystreamer.model.ArtistTrackModel;
 import com.rsatyavolu.nanodegree.spotifystreamer.model.SelectedArtistModel;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
@@ -38,7 +40,7 @@ public class ArtistDetailActivityFragment extends Fragment {
     public static final String SELECTED_ARTIST_KEY = "selected_artist";
     public static final String CLASS_NAME = "ArtistDetailActivity";
     public static final String ACTIVITY_TITLE = "Top 10 Tracks";
-    private TopTracksDisplayAdapter<Track> tracksDisplayAdapter;
+    private TopTracksDisplayAdapter<ArtistTrackModel> tracksDisplayAdapter;
 
     public ArtistDetailActivityFragment() {
     }
@@ -49,7 +51,7 @@ public class ArtistDetailActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_artist_detail, container, false);
 
         ListView trackList = (ListView)rootView.findViewById(R.id.artist_top_ten_list);
-        tracksDisplayAdapter = new TopTracksDisplayAdapter<Track>(getActivity(), R.layout.list_artist_track, R.id.track, new ArrayList<Track>());
+        tracksDisplayAdapter = new TopTracksDisplayAdapter<ArtistTrackModel>(getActivity(), R.layout.list_artist_track, R.id.track, new ArrayList<ArtistTrackModel>());
         trackList.setAdapter(tracksDisplayAdapter);
 
         final Intent intent = getActivity().getIntent();
@@ -95,12 +97,55 @@ public class ArtistDetailActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<Track> tracks) {
+            List<ArtistTrackModel> modelList = createModels(tracks);
             if(tracks != null && tracks.size() > 0) {
                 tracksDisplayAdapter.clear();
-                Iterator<Track> itr = tracks.iterator();
+                Iterator<ArtistTrackModel> itr = modelList.iterator();
                 while(itr.hasNext()) {
                     tracksDisplayAdapter.add(itr.next());
                 }
+            }
+        }
+
+        private List<ArtistTrackModel> createModels(List<Track> tracks) {
+            List<ArtistTrackModel> modelList = new ArrayList<ArtistTrackModel>();
+            Iterator<Track> itr = tracks.iterator();
+            while(itr.hasNext()) {
+                Track artistTrack = itr.next();
+
+                ArtistTrackModel model = new ArtistTrackModel();
+                model.setAlbumName(artistTrack.album.name);
+                model.setName(artistTrack.name);
+                model.setImageUrl(getAlbumIcon(artistTrack));
+
+                modelList.add(model);
+            }
+
+            return modelList;
+        }
+
+        private String getAlbumIcon(Track track) {
+
+            List<Image> imageList = track.album.images;
+            Image icon = null;
+            int leastHeight = 0;
+
+            Iterator<Image> itr = imageList.iterator();
+            while(itr.hasNext()) {
+                Image img = itr.next();
+                int height = img.height;
+                if(leastHeight == 0) {
+                    leastHeight = height;
+                } else if(height < leastHeight) {
+                    leastHeight = height;
+                    icon = img;
+                }
+            }
+
+            if(icon != null) {
+                return icon.url;
+            } else {
+                return null;
             }
         }
 

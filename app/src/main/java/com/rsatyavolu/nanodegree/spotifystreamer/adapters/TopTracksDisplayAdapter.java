@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.rsatyavolu.nanodegree.spotifystreamer.R;
+import com.rsatyavolu.nanodegree.spotifystreamer.model.ArtistTrackModel;
 import com.squareup.picasso.Picasso;
 
 import java.util.Iterator;
@@ -19,9 +20,9 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * Created by rsatyavolu on 6/29/15.
  */
-public class TopTracksDisplayAdapter<A> extends ArrayAdapter<Track> {
+public class TopTracksDisplayAdapter<A> extends ArrayAdapter<ArtistTrackModel> {
 
-    public TopTracksDisplayAdapter(Context context, int resource, int textViewResourceId, List<Track> objects) {
+    public TopTracksDisplayAdapter(Context context, int resource, int textViewResourceId, List<ArtistTrackModel> objects) {
         super(context, resource, textViewResourceId, objects);
     }
 
@@ -33,43 +34,17 @@ public class TopTracksDisplayAdapter<A> extends ArrayAdapter<Track> {
         TextView trackView = (TextView)view.findViewById(R.id.track);
         ImageView thumb_image = (ImageView)view.findViewById(R.id.album_image);
 
-        Track track = super.getItem(position);
+        ArtistTrackModel track = super.getItem(position);
 
-        albumView.setText(track.album.name);
-        trackView.setText(track.name);
+        albumView.setText(track.getAlbumName());
+        trackView.setText(track.getName());
 
-        Image artistIcon = getAlbumIcon(track);
-
-        if(artistIcon != null) {
-            Picasso.with(super.getContext()).load(artistIcon.url).into(thumb_image);
+        if(track.getImageUrl() != null) {
+            Picasso.with(super.getContext()).load(track.getImageUrl()).into(thumb_image);
         } else {
             thumb_image.setImageResource(R.drawable.artist_default);
         }
 
         return view;
     }
-
-    public static Image getAlbumIcon(Track track) {
-
-        List<Image> imageList = track.album.images;
-        Image icon = null;
-        int leastHeight = 0;
-
-        Iterator<Image> itr = imageList.iterator();
-        while(itr.hasNext()) {
-            Image img = itr.next();
-            int height = img.height;
-            if(leastHeight == 0) {
-                leastHeight = height;
-            } else if(height < leastHeight) {
-                leastHeight = height;
-                icon = img;
-            }
-        }
-
-        return icon;
-    }
-
-
-
 }
